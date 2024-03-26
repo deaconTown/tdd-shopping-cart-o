@@ -15,7 +15,7 @@ export default function Home() {
 
   useEffect(() => {
 
-    router.push("/products")
+    router.push("/login")
   }, [])
 
   return (

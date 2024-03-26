@@ -7,7 +7,7 @@ interface Props {
 
 const SharedLayout: React.FC<Props> = ({ children }: Props) => {
   return (
-    <section>
+    <section className='min-h-screen'>
       {/* Include shared UI here e.g. a header or sidebar */}
       <div className='z-0'>
         <NavBar />
@@ -17,7 +17,10 @@ const SharedLayout: React.FC<Props> = ({ children }: Props) => {
 
       {children}
 
-      <Footer />
+      <div className='bottom-0'>
+        <Footer />
+
+      </div>
     </section>
   )
 }
