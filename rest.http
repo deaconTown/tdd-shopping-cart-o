@@ -1,0 +1,5 @@
+POST http://localhost:3001/authentication/login HTTP/1.1
+{
+    "username": "email@email.com",
+    "password": "password123"
+}

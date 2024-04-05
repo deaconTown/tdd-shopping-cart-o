@@ -25,6 +25,7 @@ export class AuthenticationController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(200)
+  @HttpCode(400)
   login(@Req() req, @Res() res, @Body() authLogin: authLoginDTO) {
     console.log('AuthenticationController || entered the login endpoint')
 

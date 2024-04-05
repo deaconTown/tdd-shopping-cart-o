@@ -17,6 +17,22 @@ async function bootstrap() {
   app.use(passport.initialize())
   app.use(passport.session())
 
-  await app.listen(3000);
+  await app.listen(3001);
+
+  const app2 = await NestFactory.create(AppModule);
+
+  app2.use(
+    session({
+      secret: 'keyboard-ninja-tdd',
+      resave: false,
+      saveUninitialized: false
+    })
+  )
+
+  app2.use(passport.initialize())
+  app2.use(passport.session())
+
+
+  await app2.listen(3002);
 }
 bootstrap();

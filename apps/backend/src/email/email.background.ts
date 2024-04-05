@@ -1,11 +1,12 @@
 import { Logger } from "@nestjs/common";
 import { EmailService } from "./email.service";
-import { Process, Processor } from "@nestjs/bull";
-import { Job } from "bull";
+import { InjectQueue, Process, Processor } from "@nestjs/bull";
+import { Job, Queue } from "bull";
 
 @Processor('email')
 export class EmailBackgroundService {
-    constructor(private readonly emailService: EmailService) { }
+    constructor(private readonly emailService: EmailService,
+        @InjectQueue('email') private readonly emailQueue: Queue) { }
 
     private readonly logger = new Logger(EmailBackgroundService.name);
 
@@ -16,11 +17,11 @@ export class EmailBackgroundService {
     }
 
     async test() {
-        this.logger.log('testing concurrency'); 
+        this.logger.log('testing concurrency');
     }
 
     async pollDatabaseForPendingEmails() {
-        this.logger.log('entered pollDatabaseForPendingEmails method');
+        this.logger.log('entered pollDatabaseForPendingEmails method'); 
         try {
             this.logger.log('fetchin emails from the database');
 
@@ -42,16 +43,30 @@ export class EmailBackgroundService {
                     const parsedPendingEmails = JSON.parse(result);
                     this.logger.debug('parsedPendingEmails', parsedPendingEmails)
 
-                    for (const i = 0 ; i < 1000000000000000; i+1)
-                    {
-                        for (const email of parsedPendingEmails) {
-                            this.logger.debug('email to send', email)
-                            this.sendWelcomeEmail(email);
+                    console.log('attempting to send emails')
+                    // for (const i = 0 ; i < 1000000000000000; i+1)
+                    // {
+                    //     for (const email of parsedPendingEmails) {
+                    //             this.logger.debug('queuing email to send', email)
+                    //             // this.sendWelcomeEmail(email);
+                    //             const queueThisEmail = async () => {
+                    //                 await this.queueEmailAsync(email);
+                    //             }
+        
+                    //             queueThisEmail();
+                    //         }
+                    // }
+
+                    // console.log('attempting to send emails')
+                    for (const email of parsedPendingEmails) {
+                        this.logger.debug('queuing email to send', email)
+                        // this.sendWelcomeEmail(email);
+                        const queueThisEmail = async () => {
+                            await this.queueEmailAsync(email);
                         }
+
+                        queueThisEmail();
                     }
-
-                    
-
 
                 })
                 .catch((error) => console.error('error', error));
@@ -69,17 +84,27 @@ export class EmailBackgroundService {
         this.logger.log('exiting pollDatabaseForPendingEmails method');
     }
 
+    async queueEmailAsync(email: string): Promise<void> {
+        try {
+            await this.emailQueue.add('sendEmail', email);
+        } catch (error) {
+            this.logger.error(`Failed to queue email with id ${JSON.parse(JSON.stringify(email))['id']}`, error.stack);
+            throw error;
+        }
+    }
+
+
     @Process('sendWelcomeEmail')
-    async sendWelcomeEmail(job: Job<{ test: string }>): Promise<void> {
+    async sendWelcomeEmailAsync(job: Job<{ test: string }>): Promise<void> {
         this.logger.log('entered sendWelcomeEmail method in background service ');
         this.logger.log('job ddsfs', job);
         const email = job['emailString'];
 
 
         try {
-            await this.emailService.sendWelcomeEmail(email); 
+            await this.emailService.sendWelcomeEmail(email);
         } catch (error) {
-            this.logger.error('failed to send email. ', error.stack);
+            this.logger.error(`failed to retrieve emails with id ${email.id}. `, error.stack);
             throw error;
         }
     }

@@ -4,11 +4,12 @@ import { BullModule } from '@nestjs/bull';
 import { EmailBackgroundService } from './email.background';
 
 @Module({
-  providers: [EmailService, EmailBackgroundService],
   imports: [
-    BullModule.registerQueue({
+    BullModule.registerQueueAsync({
       name: 'email'
     })
-  ]
+  ],
+  providers: [EmailService, EmailBackgroundService],
+  exports: [EmailService, EmailBackgroundService]
 })
 export class EmailModule { }
