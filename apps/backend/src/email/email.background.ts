@@ -11,10 +11,10 @@ export class EmailBackgroundService {
     private readonly logger = new Logger(EmailBackgroundService.name);
 
 
-    async onModuleInit(): Promise<void> {
-        await this.pollDatabaseForPendingEmails();
-        await this.test();
-    }
+    // async onModuleInit(): Promise<void> {
+    //     await this.pollDatabaseForPendingEmails();
+    //     await this.test();
+    // }
 
     async test() {
         this.logger.log('testing concurrency');

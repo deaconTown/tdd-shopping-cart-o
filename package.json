@@ -6,5 +6,11 @@
   "author": "deaconTown<daviabizniz@gmail.com>",
   "license": "MIT",
   "private": true,
-  "workspaces": ["packages/*", "apps/*"]
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "dependencies": {
+    "nodemon": "^3.1.0"
+  }
 }
